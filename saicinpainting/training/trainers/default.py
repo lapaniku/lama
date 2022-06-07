@@ -44,7 +44,7 @@ class DefaultInpaintingTrainingModule(BaseInpaintingTrainingModule):
         if self.fake_fakes_proba > 1e-3:
             self.fake_fakes_gen = FakeFakesGenerator(**(fake_fakes_generator_kwargs or {}))
 
-    def forward(self, batch):
+    def forward(self, batch_tensor):
         # all preprocessing is removed 
         # if self.training and self.rescale_size_getter is not None:
         #     cur_size = self.rescale_size_getter(self.global_step)
@@ -55,8 +55,12 @@ class DefaultInpaintingTrainingModule(BaseInpaintingTrainingModule):
         #     batch = make_constant_area_crop_batch(batch, **self.const_area_crop_kwargs)
         
         # extract image from tensor
-        img = batch[:, :3, :, :]
-        mask = batch[:, 3:4, :, :]
+        img = batch_tensor[:, :3, :, :]
+        mask = batch_tensor[:, 3:4, :, :]
+
+        batch = {}
+        batch["img"] = img
+        batch["mask"] = mask 
 
         masked_img = img * (1 - mask)
 
