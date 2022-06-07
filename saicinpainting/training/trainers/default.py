@@ -45,16 +45,18 @@ class DefaultInpaintingTrainingModule(BaseInpaintingTrainingModule):
             self.fake_fakes_gen = FakeFakesGenerator(**(fake_fakes_generator_kwargs or {}))
 
     def forward(self, batch):
-        if self.training and self.rescale_size_getter is not None:
-            cur_size = self.rescale_size_getter(self.global_step)
-            batch['image'] = F.interpolate(batch['image'], size=cur_size, mode='bilinear', align_corners=False)
-            batch['mask'] = F.interpolate(batch['mask'], size=cur_size, mode='nearest')
+        # all preprocessing is removed 
+        # if self.training and self.rescale_size_getter is not None:
+        #     cur_size = self.rescale_size_getter(self.global_step)
+        #     batch['image'] = F.interpolate(batch['image'], size=cur_size, mode='bilinear', align_corners=False)
+        #     batch['mask'] = F.interpolate(batch['mask'], size=cur_size, mode='nearest')
 
-        if self.training and self.const_area_crop_kwargs is not None:
-            batch = make_constant_area_crop_batch(batch, **self.const_area_crop_kwargs)
-
-        img = batch['image']
-        mask = batch['mask']
+        # if self.training and self.const_area_crop_kwargs is not None:
+        #     batch = make_constant_area_crop_batch(batch, **self.const_area_crop_kwargs)
+        
+        # extract image from tensor
+        img = batch[:, :3, :, :]
+        mask = batch[:, 3:4, :, :]
 
         masked_img = img * (1 - mask)
 
